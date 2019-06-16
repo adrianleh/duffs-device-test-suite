@@ -33,6 +33,10 @@ public class TestDuff {
         return System.getenv("LOC_TEST_CASES").trim();
     }
 
+    private static boolean isTestcase(File file) {
+        return file.getName().endsWith(FILE_EXT);
+    }
+
     private static boolean isValid(File file) {
         return file.getName().endsWith(FILE_EXT) && !file.getName().endsWith(INVALID_ENDING);
     }
@@ -125,20 +129,18 @@ public class TestDuff {
     }
 
     private Stream<File> getTestCases() {
-        return Stream.of(new File(getTestCaseLoc()).listFiles());
+        return Stream.of(new File(getTestCaseLoc()).listFiles()).filter(TestDuff::isTestcase);
     }
 
     @TestFactory
     public Stream<DynamicNode> createCorrectnessTest() {
-        return getTestCases().
-            filter(TestDuff::isValid)
+        return getTestCases()
             .map(file -> DynamicTest.dynamicTest(String.format("factor_%d-%s", 4, file.getName()), () -> runAssertEqual(file, 4)));
     }
 
     @TestFactory
     public Stream<DynamicNode> createCorrectnessTestAllFactors() {
-        return getTestCases().
-            filter(TestDuff::isValid)
+        return getTestCases()
             .flatMap(file -> IntStream.range(2, 32)
                 .mapToObj(i -> DynamicTest.dynamicTest(String.format("factor_%d-%s", i, file.getName()), () -> runAssertEqual(file, i)))
             );
