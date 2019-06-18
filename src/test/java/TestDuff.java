@@ -94,8 +94,8 @@ public class TestDuff {
         var originalRun = Runtime.getRuntime().exec(new String[] {tempFileOriginal.getAbsolutePath()});
         var unrolledRun = Runtime.getRuntime().exec(new String[] {tempFileUnrolled.getAbsolutePath()});
 
-        boolean originalInf = !originalRun.waitFor(10, TimeUnit.SECONDS);
-        boolean unrolledInf = !unrolledRun.waitFor(10, TimeUnit.SECONDS);
+        boolean originalInf = !originalRun.waitFor(3, TimeUnit.SECONDS);
+        boolean unrolledInf = !unrolledRun.waitFor(3, TimeUnit.SECONDS);
         Assertions.assertEquals(originalInf, unrolledInf, String.format("Incorrect infinite behavior original was %sinfinite; unrolled was %sinfinite!", originalInf ? "" : "not ", unrolledInf ? "" : "not "));
 
         if (originalInf) {
