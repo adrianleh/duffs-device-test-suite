@@ -84,9 +84,10 @@ public class TestDuff {
 
         boolean originalCompileInf = !originalCompile.waitFor(10, TimeUnit.SECONDS);
         boolean unrolledCompileInf = !unrollCompile.waitFor(10, TimeUnit.SECONDS);
+        unrollCompile.destroy();
+        originalCompile.destroy();
 
         Assertions.assertFalse(originalCompileInf || unrolledCompileInf, "Compiler ran into infinite loop");
-        unrollCompile.destroy();
         unrollCompile.waitFor();
         Assertions.assertEquals(unrollCompile.exitValue(), 0, "Compile failed!");
 
