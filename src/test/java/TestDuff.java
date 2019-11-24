@@ -79,7 +79,7 @@ public class TestDuff {
         Stream.of(tempFileOriginal, tempFileUnrolled).forEach(File::deleteOnExit);
         var originalCompile = Runtime.getRuntime().exec(new String[] {getCparserLoc(), "-O0", "-o", tempFileOriginal.getAbsolutePath(),
             file.getAbsolutePath()});
-        var unrollCompile = Runtime.getRuntime().exec(new String[] {getCparserLoc(), "-fno-inline", "-funroll-loops", "-o", tempFileUnrolled.getAbsolutePath(),
+        var unrollCompile = Runtime.getRuntime().exec(new String[] {getCparserLoc(), "-fno-inline", "-O3", "-funroll-loops", "-o", tempFileUnrolled.getAbsolutePath(),
             file.getAbsolutePath()}, new String[] {String.format("DUFF_FACTOR=%d", duff_factor)});
 
         boolean originalCompileInf = !originalCompile.waitFor(10, TimeUnit.SECONDS);
@@ -89,8 +89,10 @@ public class TestDuff {
 
         Assertions.assertFalse(originalCompileInf || unrolledCompileInf, "Compiler ran into infinite loop");
         unrollCompile.waitFor();
-        Assertions.assertEquals(unrollCompile.exitValue(), 0, "Compile failed!");
-
+        Assertions.assertEquals(originalCompile.exitValue(), unrollCompile.exitValue(), "Compile failed!");
+        if (originalCompile.exitValue() != 0) {
+            return;
+        }
 
         var originalRun = Runtime.getRuntime().exec(new String[] {tempFileOriginal.getAbsolutePath()});
         var unrolledRun = Runtime.getRuntime().exec(new String[] {tempFileUnrolled.getAbsolutePath()});
@@ -142,7 +144,7 @@ public class TestDuff {
     @TestFactory
     public Stream<DynamicNode> createCorrectnessTestAllFactors() {
         return getTestCases()
-            .flatMap(file -> IntStream.range(2, 32)
+            .flatMap(file -> IntStream.iterate(2, i -> i * 2).limit(5)
                 .mapToObj(i -> DynamicTest.dynamicTest(String.format("factor_%d-%s", i, file.getName()), () -> runAssertEqual(file, i)))
             );
     }
